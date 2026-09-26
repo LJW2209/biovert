@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Input Data Setoran - Biovert</title>
+    <meta name="description" content="Form input data setoran internal Biovert." />
+    <meta property="og:title" content="Input Data Setoran - Biovert" />
+    <meta property="og:description" content="Input data internal untuk mengelola setoran mitra Biovert." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/assets/images/og-image.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand" href="index.html" aria-label="Biovert home">
+          <span class="brand-mark">B</span>
+          <span class="brand-text">
+            <strong>Biovert</strong>
+            <small>by CYCLO</small>
+          </span>
+        </a>
+        <div class="nav-spacer"></div>
+      </div>
+    </header>
+
+    <main class="page-shell login-shell">
+      <div class="container auth-shell">
+        <div id="loginCard" class="panel auth-panel">
+          <p class="eyebrow">Area internal</p>
+          <h1>Masuk</h1>
+          <form id="loginForm" novalidate>
+            <div class="field-group">
+              <label for="loginUsername">Username</label>
+              <input id="loginUsername" type="text" required />
+            </div>
+            <div class="field-group">
+              <label for="loginPassword">Password</label>
+              <input id="loginPassword" type="password" required />
+            </div>
+            <button type="submit" class="btn btn-primary wide-btn">Masuk</button>
+            <p id="loginError" class="field-error hidden">Username atau password salah.</p>
+          </form>
+        </div>
+
+        <div id="inputPanel" class="panel input-panel hidden">
+          <div class="panel-header auth-header">
+            <div>
+              <p class="eyebrow">Input Data Setoran</p>
+              <h1>Input Data Setoran</h1>
+            </div>
+            <button id="logoutBtn" class="btn btn-outline">Keluar</button>
+          </div>
+
+          <form id="setoranForm" novalidate>
+            <div class="field-group">
+              <label for="pedagangSelect">Pilih Pedagang</label>
+              <select id="pedagangSelect" required></select>
+              <small class="error-message"></small>
+            </div>
+
+            <div class="field-group">
+              <label for="tanggalSetoran">Tanggal</label>
+              <input id="tanggalSetoran" type="date" required />
+              <small class="error-message"></small>
+            </div>
+
+            <div class="field-group">
+              <label for="beratSampah">Berat Sampah (kg)</label>
+              <input id="beratSampah" type="number" min="0.1" step="0.1" required />
+              <small class="error-message"></small>
+            </div>
+
+            <div class="field-group">
+              <label for="kerapian">Kerapian Pemilahan</label>
+              <select id="kerapian" required>
+                <option value="">Pilih kerapian</option>
+                <option value="Rapi">Rapi</option>
+                <option value="Cukup Rapi">Cukup Rapi</option>
+                <option value="Kurang Rapi">Kurang Rapi</option>
+              </select>
+              <small class="error-message"></small>
+            </div>
+
+            <div class="field-group">
+              <label for="catatan">Catatan</label>
+              <textarea id="catatan" rows="4"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary wide-btn">Simpan Setoran</button>
+          </form>
+
+          <div class="history-box">
+            <h2>Riwayat hari ini</h2>
+            <div id="historyList" class="history-list"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <div class="brand footer-brand">
+            <span class="brand-mark">B</span>
+            <span class="brand-text">
+              <strong>Biovert</strong>
+              <small>by CYCLO</small>
+            </span>
+          </div>
+          <p>Membawa sampah organik pasar menjadi solusi bernilai bagi lingkungan dan ekonomi lokal.</p>
+        </div>
+        <div>
+          <h3>Link cepat</h3>
+          <ul>
+            <li><a href="index.html">Beranda</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="leaderboard.html">Leaderboard</a></li>
+            <li><a href="katalog.html">Katalog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Kontak & partner</h3>
+          <p>Email: hello@biovert.id</p>
+          <p>WhatsApp: +62 812-3456-7890</p>
+          <div class="partner-badges">
+            <span>BSF</span>
+            <span>CYCLO</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container">
+          <p>© 2026 Biovert by CYCLO</p>
+          <p class="last-updated">Terakhir diperbarui: --</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>

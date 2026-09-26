@@ -1,0 +1,794 @@
+const STORAGE_KEY = 'biovert-state-v1';
+const defaultLanguage = 'id';
+
+const seedData = {
+  language: 'id',
+  ringkasan: { total_sampah_kg: 1240, jumlah_mitra_aktif: 32, produk_terjual_kg: 410 },
+  pedagang: [
+    { nama: 'Bu Sari', pasar: 'Pasar Anyar', peran: 'Pedagang', poin: 620, rank: 'Platinum', kg_minggu_ini: 42 },
+    { nama: 'Pak Dedi', pasar: 'Pasar Anyar', peran: 'Pedagang', poin: 545, rank: 'Platinum', kg_minggu_ini: 38 },
+    { nama: 'Bu Nina', pasar: 'Pasar Baru Timur', peran: 'Pedagang', poin: 480, rank: 'Gold', kg_minggu_ini: 33 },
+    { nama: 'Pak Herman', pasar: 'Pasar Baru Timur', peran: 'Pedagang', poin: 340, rank: 'Gold', kg_minggu_ini: 27 },
+    { nama: 'Bu Wati', pasar: 'Pasar Anyar', peran: 'Pedagang', poin: 265, rank: 'Silver', kg_minggu_ini: 20 },
+    { nama: 'Pak Joko', pasar: 'Pasar Kaget Minggu', peran: 'Pedagang', poin: 180, rank: 'Silver', kg_minggu_ini: 15 },
+    { nama: 'Bu Lilis', pasar: 'Pasar Kaget Minggu', peran: 'Pedagang', poin: 90, rank: 'Bronze', kg_minggu_ini: 8 },
+    { nama: 'Pak Ujang', pasar: 'Pasar Baru Timur', peran: 'Pedagang', poin: 45, rank: 'Bronze', kg_minggu_ini: 5 }
+  ],
+  setoran_kalender: [
+    { tanggal: '2026-09-14', kg_masuk: 38, pedagang_setor: 6, poin_terkumpul: 145 },
+    { tanggal: '2026-09-15', kg_masuk: 45, pedagang_setor: 7, poin_terkumpul: 168 },
+    { tanggal: '2026-09-16', kg_masuk: 0, pedagang_setor: 0, poin_terkumpul: 0, catatan: 'pasar libur' },
+    { tanggal: '2026-09-17', kg_masuk: 41, pedagang_setor: 6, poin_terkumpul: 152 }
+  ],
+  produk: [
+    { nama: 'Pakan Maggot Basah', kategori: 'Pakan', harga_per_kg: 7000 },
+    { nama: 'Pakan Maggot Kering', kategori: 'Pakan', harga_per_kg: 18000 },
+    { nama: 'Pupuk Kasgot', kategori: 'Pupuk', harga_per_kg: 3000 }
+  ],
+  testimoni: [
+    { nama: 'Bu Sari', peran: 'Pedagang Sayur, Pasar Anyar', kutipan: 'Sejak ikut Biovert, sampah sayur yang biasanya dibuang sekarang malah jadi poin dan hadiah.' },
+    { nama: 'Pak Dedi', peran: 'Pedagang Buah, Pasar Anyar', kutipan: 'Prosesnya gampang tinggal setor dan dicatat, lapak jadi lebih bersih juga.' }
+  ],
+  pendaftaran: [],
+  setoran_history: [],
+  login: { isLoggedIn: false },
+  lastUpdated: new Date().toISOString()
+};
+
+function getState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seedData));
+      return structuredClone(seedData);
+    }
+    const parsed = JSON.parse(raw);
+    return { ...seedData, ...parsed, ringkasan: { ...seedData.ringkasan, ...(parsed.ringkasan || {}) }, pedagang: parsed.pedagang || seedData.pedagang, produk: parsed.produk || seedData.produk, testimoni: parsed.testimoni || seedData.testimoni, pendaftaran: parsed.pendaftaran || [], setoran_history: parsed.setoran_history || [], login: parsed.login || { isLoggedIn: false }, lastUpdated: parsed.lastUpdated || new Date().toISOString() };
+  } catch (error) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(seedData));
+    return structuredClone(seedData);
+  }
+}
+
+function saveState(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat('id-ID').format(value);
+}
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
+}
+
+function getRankFromPoin(poin) {
+  if (poin >= 600) return 'Platinum';
+  if (poin >= 301) return 'Gold';
+  if (poin >= 101) return 'Silver';
+  return 'Bronze';
+}
+
+function getProgressToNext(poin) {
+  if (poin >= 600) return 100;
+  const next = poin < 101 ? 101 : poin < 301 ? 301 : poin < 601 ? 601 : 600;
+  const total = next - (poin < 101 ? 0 : poin < 301 ? 100 : poin < 601 ? 300 : 600);
+  const current = Math.min(100, Math.max(5, (poin / next) * 100));
+  return Math.round(current);
+}
+
+function updateLastUpdatedText(selector = '.last-updated') {
+  const nodeList = document.querySelectorAll(selector);
+  const now = new Date();
+  const formatted = now.toLocaleString('id-ID', {
+    day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+
+  nodeList.forEach((node) => {
+    node.textContent = `Terakhir diperbarui: ${formatted}`;
+  });
+}
+
+function setLanguage(lang) {
+  const state = getState();
+  state.language = lang;
+  saveState(state);
+  document.documentElement.lang = lang;
+  const languageButtons = document.querySelectorAll('.lang-btn');
+  languageButtons.forEach((button) => {
+    button.classList.toggle('active', button.dataset.lang === lang);
+  });
+  applyTranslations();
+}
+
+const translations = {
+  id: {
+    'nav.home': 'Beranda',
+    'nav.dashboard': 'Dashboard',
+    'nav.leaderboard': 'Leaderboard',
+    'nav.catalog': 'Katalog',
+    'nav.about': 'Tentang Kami',
+    'footer.about': 'Membawa sampah organik pasar menjadi solusi bernilai bagi lingkungan dan ekonomi lokal.',
+    'footer.linksTitle': 'Link cepat',
+    'footer.contactTitle': 'Kontak & partner',
+    'home.eyebrow': 'Dampak nyata untuk pasar dan lingkungan',
+    'home.heroTitle': 'Sampah Pasar Jadi Pakan dan Pupuk',
+    'home.heroLead': 'Biovert mengubah sampah organik pasar tradisional menjadi pakan ternak dan pupuk organik yang bernilai tinggi.',
+    'home.dashboardBtn': 'Lihat Dashboard',
+    'home.joinBtn': 'Gabung Jadi Mitra',
+    'home.statsEyebrow': 'Statistik dampak',
+    'home.statsTitle': 'Dampak nyata yang terus tumbuh',
+    'home.workflowEyebrow': 'Alur kerja',
+    'home.workflowTitle': 'Dari sampah pasar menuju nilai ekonomi',
+    'home.step1': 'Setor',
+    'home.step1Text': 'Pedagang menyetorkan sampah organik hasil pasar.',
+    'home.step2': 'Maggot Mengolah',
+    'home.step2Text': 'BSF mengolah limbah secara efisien dan cepat.',
+    'home.step3': 'Pakan & Pupuk',
+    'home.step3Text': 'Hasilnya menjadi pakan ternak dan pupuk kasgot.',
+    'home.step4': 'Disalurkan',
+    'home.step4Text': 'Produk didistribusikan ke peternak dan petani.',
+    'home.testiEyebrow': 'Testimoni',
+    'home.testiTitle': 'Mitra yang merasakan manfaatnya',
+    'home.ctaEyebrow': 'Bergabung bersama Biovert',
+    'home.ctaTitle': 'Mari bangun ekonomi sirkular untuk pasar tradisional.',
+    'home.ctaBtn': 'Gabung Sekarang',
+    'footer.about': 'Membawa sampah organik pasar menjadi solusi bernilai bagi lingkungan dan ekonomi lokal.'
+  },
+  en: {
+    'nav.home': 'Home',
+    'nav.dashboard': 'Dashboard',
+    'nav.leaderboard': 'Leaderboard',
+    'nav.catalog': 'Catalog',
+    'nav.about': 'About Us',
+    'footer.about': 'Turning organic market waste into valuable solutions for the environment and local economy.',
+    'footer.linksTitle': 'Quick links',
+    'footer.contactTitle': 'Contact & partners',
+    'home.eyebrow': 'Real impact for markets and environment',
+    'home.heroTitle': 'Market Waste into Feed and Fertilizer',
+    'home.heroLead': 'Biovert transforms organic waste from traditional markets into high-value animal feed and organic fertilizer.',
+    'home.dashboardBtn': 'View Dashboard',
+    'home.joinBtn': 'Join as Partner',
+    'home.statsEyebrow': 'Impact statistics',
+    'home.statsTitle': 'Real impact that keeps growing',
+    'home.workflowEyebrow': 'How it works',
+    'home.workflowTitle': 'From market waste to economic value',
+    'home.step1': 'Collect',
+    'home.step1Text': 'Merchants deposit organic waste from the market.',
+    'home.step2': 'Maggot Processing',
+    'home.step2Text': 'BSF efficiently processes the waste.',
+    'home.step3': 'Feed & Fertilizer',
+    'home.step3Text': 'The output becomes livestock feed and kasgot fertilizer.',
+    'home.step4': 'Distributed',
+    'home.step4Text': 'Products are distributed to farmers and breeders.',
+    'home.testiEyebrow': 'Testimonials',
+    'home.testiTitle': 'Partners who feel the benefits',
+    'home.ctaEyebrow': 'Join Biovert',
+    'home.ctaTitle': 'Let’s build a circular economy for traditional markets.',
+    'home.ctaBtn': 'Join Now',
+    'footer.about': 'Turning organic market waste into valuable solutions for the environment and local economy.'
+  },
+  zh: {
+    'nav.home': '首页',
+    'nav.dashboard': '数据看板',
+    'nav.leaderboard': '排行榜',
+    'nav.catalog': '产品目录',
+    'nav.about': '关于我们',
+    'footer.about': '将市场有机废弃物转化为对环境和地方经济有价值的解决方案。',
+    'footer.linksTitle': '快速链接',
+    'footer.contactTitle': '联系与合作伙伴',
+    'home.eyebrow': '为市场与环境带来真实影响',
+    'home.heroTitle': '市场废弃物转化为饲料与肥料',
+    'home.heroLead': 'Biovert 将传统市场的有机废弃物转化为高价值的动物饲料和有机肥料。',
+    'home.dashboardBtn': '查看数据看板',
+    'home.joinBtn': '加入合作伙伴',
+    'home.statsEyebrow': '影响统计',
+    'home.statsTitle': '持续增长的真实影响',
+    'home.workflowEyebrow': '运作流程',
+    'home.workflowTitle': '从市场废弃物到经济价值',
+    'home.step1': '收集',
+    'home.step1Text': '商户将市场有机废弃物交由我们处理。',
+    'home.step2': '虫蛆处理',
+    'home.step2Text': 'BSF 有效快速地处理废弃物。',
+    'home.step3': '饲料与肥料',
+    'home.step3Text': '产出变为家畜饲料和 kasgot 肥料。',
+    'home.step4': '分发',
+    'home.step4Text': '产品被分发给养殖户和农户。',
+    'home.testiEyebrow': '用户评价',
+    'home.testiTitle': '切实受益的合作伙伴',
+    'home.ctaEyebrow': '加入 Biovert',
+    'home.ctaTitle': '让我们一起为传统市场建立循环经济。',
+    'home.ctaBtn': '立即加入',
+    'footer.about': '将市场有机废弃物转化为对环境和地方经济有价值的解决方案。'
+  }
+};
+
+function applyTranslations() {
+  const lang = getState().language || defaultLanguage;
+  const dict = translations[lang] || translations[defaultLanguage];
+  document.querySelectorAll('[data-i18n]').forEach((node) => {
+    const key = node.dataset.i18n;
+    if (dict[key]) node.textContent = dict[key];
+  });
+
+  document.querySelectorAll('.nav a').forEach((link) => {
+    const labels = {
+      'index.html': dict['nav.home'],
+      'dashboard.html': dict['nav.dashboard'],
+      'leaderboard.html': dict['nav.leaderboard'],
+      'katalog.html': dict['nav.catalog'],
+      'tentang.html': dict['nav.about']
+    };
+    if (labels[link.getAttribute('href')]) link.textContent = labels[link.getAttribute('href')];
+  });
+}
+
+function updateDashboardUpdated() {
+  const nodes = document.querySelectorAll('#dashboard-updated, #leaderboard-updated');
+  const now = new Date();
+  const text = now.toLocaleString('id-ID', {
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+  nodes.forEach((el) => { el.textContent = text; });
+}
+
+function setupLanguageButtons() {
+  document.querySelectorAll('.lang-btn').forEach((button) => {
+    button.addEventListener('click', () => setLanguage(button.dataset.lang));
+  });
+}
+
+function initNavigation() {
+  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav a').forEach((link) => {
+    const href = link.getAttribute('href');
+    if (href === currentPage) link.classList.add('active');
+  });
+
+  const toggle = document.querySelector('.menu-toggle');
+  if (!toggle) return;
+  toggle.addEventListener('click', () => {
+    const nav = document.querySelector('.nav');
+    nav.classList.toggle('open');
+    toggle.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', nav.classList.contains('open'));
+  });
+}
+
+function renderHome() {
+  const state = getState();
+  const cards = document.getElementById('impact-cards');
+  if (!cards) return;
+
+  const stats = [
+    { icon: '♻', label: 'Total sampah terolah', value: `${formatNumber(state.ringkasan.total_sampah_kg)} kg` },
+    { icon: '👥', label: 'Jumlah mitra aktif', value: `${formatNumber(state.ringkasan.jumlah_mitra_aktif)} mitra` },
+    { icon: '📦', label: 'Produk terjual', value: `${formatNumber(state.ringkasan.produk_terjual_kg)} kg` }
+  ];
+
+  cards.innerHTML = stats.map((item) => `
+    <article class="stat-card card">
+      <div class="stat-icon">${item.icon}</div>
+      <div class="stat-value">${item.value}</div>
+      <div class="stat-label">${item.label}</div>
+    </article>
+  `).join('');
+
+  const testimonials = document.getElementById('testimonial-cards');
+  if (testimonials) {
+    testimonials.innerHTML = state.testimoni.map((item) => `
+      <article class="card testimonial-card">
+        <p class="quote">“${item.kutipan}”</p>
+        <div class="person">
+          <strong>${item.nama}</strong>
+          <span>${item.peran}</span>
+        </div>
+      </article>
+    `).join('');
+  }
+}
+
+function renderLeaderboardList() {
+  const leaderboardBody = document.getElementById('leaderboardBody');
+  const leaderboardTop3 = document.getElementById('leaderboard-top3');
+  if (!leaderboardBody && !leaderboardTop3) return;
+
+  const state = getState();
+  const sorted = [...state.pedagang].sort((a, b) => b.poin - a.poin);
+  const currentPage = Number(document.body.dataset.pageIndex || 1);
+  const pageSize = 15;
+  const start = (currentPage - 1) * pageSize;
+  const items = sorted.slice(start, start + pageSize);
+
+  leaderboardBody.innerHTML = items.map((entry, index) => {
+    const actualRank = start + index + 1;
+    const progress = Math.min(100, Math.round((entry.poin / 620) * 100));
+    return `
+      <tr data-nama="${entry.nama}">
+        <td>#${actualRank}</td>
+        <td><a href="mitra.html?id=${encodeURIComponent(entry.nama.toLowerCase().replace(/\s+/g, '-'))}">${entry.nama}</a></td>
+        <td>${entry.pasar}</td>
+        <td><span class="rank-badge ${entry.rank.toLowerCase()}">${entry.rank}</span></td>
+        <td>${formatNumber(entry.poin)}</td>
+        <td>
+          <div class="mini-progress">
+            <span style="width:${progress}%"></span>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (leaderboardTop3) {
+    const topThree = sorted.slice(0, 3);
+    leaderboardTop3.innerHTML = topThree.map((entry, idx) => `
+      <article class="podium-card ${idx === 1 ? 'is-featured' : ''}">
+        <span class="medal">${idx + 1}</span>
+        <h3>${entry.nama}</h3>
+        <p>${entry.pasar}</p>
+        <div class="rank-badge ${entry.rank.toLowerCase()}">${entry.rank}</div>
+        <strong>${formatNumber(entry.poin)} poin</strong>
+      </article>
+    `).join('');
+  }
+
+  const pageInfo = document.getElementById('pageInfo');
+  if (pageInfo) {
+    pageInfo.textContent = `Halaman ${currentPage}`;
+  }
+}
+
+function bindLeaderboardSearch() {
+  const input = document.getElementById('leaderboardSearch');
+  if (!input) return;
+
+  input.addEventListener('input', () => {
+    const value = input.value.trim().toLowerCase();
+    const rows = document.querySelectorAll('#leaderboardBody tr');
+    rows.forEach((row) => {
+      const name = row.dataset.nama || '';
+      row.style.display = name.toLowerCase().includes(value) ? '' : 'none';
+    });
+  });
+}
+
+function initLeaderboardPagination() {
+  const body = document.getElementById('leaderboardBody');
+  if (!body) return;
+
+  const state = getState();
+  const total = state.pedagang.length;
+  const pageSize = 15;
+  const maxPages = Math.ceil(total / pageSize);
+
+  document.body.dataset.pageIndex = document.body.dataset.pageIndex || '1';
+  document.getElementById('prevPage')?.addEventListener('click', () => {
+    const next = Math.max(1, Number(document.body.dataset.pageIndex) - 1);
+    document.body.dataset.pageIndex = String(next);
+    renderLeaderboardList();
+  });
+
+  document.getElementById('nextPage')?.addEventListener('click', () => {
+    const next = Math.min(maxPages, Number(document.body.dataset.pageIndex) + 1);
+    document.body.dataset.pageIndex = String(next);
+    renderLeaderboardList();
+  });
+}
+
+function renderProducts() {
+  const grid = document.getElementById('productGrid');
+  if (!grid) return;
+
+  const state = getState();
+  const categoryButtons = document.querySelectorAll('.segment');
+  const renderCategory = (category) => {
+    const filtered = category === 'all' ? state.produk : state.produk.filter((p) => p.kategori === category);
+    grid.innerHTML = filtered.map((product) => `
+      <article class="product-card card">
+        <div class="product-thumb ${product.kategori.toLowerCase()}" aria-hidden="true"></div>
+        <span class="product-tag">${product.kategori}</span>
+        <h3>${product.nama}</h3>
+        <p class="product-description">Produk ${product.kategori.toLowerCase()} berkualitas untuk kebutuhan usaha.</p>
+        <div class="product-footer">
+          <strong>${formatCurrency(product.harga_per_kg)}/kg</strong>
+          <a href="https://wa.me/6281234567890" class="btn btn-primary" target="_blank" rel="noreferrer">Hubungi via WhatsApp</a>
+        </div>
+      </article>
+    `).join('');
+  };
+
+  categoryButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      categoryButtons.forEach((b) => b.classList.toggle('active', b === button));
+      renderCategory(button.dataset.category || 'all');
+    });
+  });
+
+  renderCategory('all');
+}
+
+function renderMitraProfile() {
+  const container = document.getElementById('mitra-profile');
+  if (!container) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const queryId = params.get('id') || 'bu-sari';
+  const entry = getState().pedagang.find((m) => slugify(m.nama) === queryId) || getState().pedagang[0];
+
+  const history = [
+    { week: 'Minggu 1', kg: 18 },
+    { week: 'Minggu 2', kg: 26 },
+    { week: 'Minggu 3', kg: 21 },
+    { week: 'Minggu 4', kg: 32 },
+    { week: 'Minggu 5', kg: 39 },
+    { week: 'Minggu 6', kg: 35 },
+    { week: 'Minggu 7', kg: 40 },
+    { week: 'Minggu 8', kg: 42 }
+  ];
+
+  const badges = [
+    { name: 'Pionir Sampah', earned: true },
+    { name: 'Setor Konsisten', earned: true },
+    { name: 'Mitra Unggul', earned: false },
+    { name: 'Champion', earned: false }
+  ];
+
+  container.innerHTML = `
+    <section class="profile-header panel">
+      <div>
+        <p class="eyebrow">Profil mitra</p>
+        <h1>${entry.nama}</h1>
+      </div>
+      <div class="profile-meta">
+        <span class="rank-badge ${entry.rank.toLowerCase()}">${entry.rank}</span>
+        <strong>${formatNumber(entry.poin)} poin</strong>
+        <small>${entry.pasar}</small>
+      </div>
+    </section>
+
+    <section class="profile-grid">
+      <article class="panel chart-panel">
+        <h3>Riwayat setoran</h3>
+        <div class="mini-line-chart">
+          ${history.map((item) => `<span style="height:${Math.min(100, item.kg * 2.2)}%"></span>`).join('')}
+        </div>
+      </article>
+
+      <article class="panel badge-panel">
+        <h3>Koleksi lencana</h3>
+        <div class="badge-grid">
+          ${badges.map((badge) => `<div class="badge-item ${badge.earned ? '' : 'is-muted'}"><span>${badge.name.slice(0, 1)}</span><small>${badge.name}</small></div>`).join('')}
+        </div>
+      </article>
+    </section>
+
+    <section class="panel rewards-panel">
+      <h3>Riwayat hadiah</h3>
+      <ul class="reward-list">
+        <li><strong>Hadiah 1</strong> <span>20 Agustus 2026</span></li>
+        <li><strong>Hadiah 2</strong> <span>28 Agustus 2026</span></li>
+      </ul>
+    </section>
+  `;
+}
+
+function slugify(value) {
+  return value.toLowerCase().normalize('NFD').replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+}
+
+function renderSponsorStats() {
+  const container = document.querySelector('.sponsor-stats');
+  if (!container) return;
+  const state = getState();
+  const cards = [
+    { label: 'Total sampah terolah', value: '1.240 kg' },
+    { label: 'Mitra aktif', value: '32 mitra' },
+    { label: 'CO2 terhindarkan', value: '480 kg' },
+    { label: 'Produk terjual', value: '410 kg' }
+  ];
+  container.innerHTML = cards.map((card) => `
+    <article class="stat-card card">
+      <div class="stat-value">${card.value}</div>
+      <div class="stat-label">${card.label}</div>
+    </article>
+  `).join('');
+}
+
+function initJoinForm() {
+  const form = document.getElementById('joinForm');
+  if (!form) return;
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const state = getState();
+    const fields = ['nama', 'pasar', 'peran', 'whatsapp'];
+    let valid = true;
+
+    fields.forEach((name) => {
+      const field = form.querySelector(`[name="${name}"]`);
+      const error = field.parentElement.querySelector('.error-message');
+      if (!field.value.trim()) {
+        valid = false;
+        field.classList.add('input-error');
+        error.textContent = 'Field wajib diisi.';
+      } else {
+        field.classList.remove('input-error');
+        error.textContent = '';
+      }
+    });
+
+    const consent = document.getElementById('consent');
+    const consentBox = consent.closest('.checkbox-field').querySelector('.error-message');
+    if (!consent.checked) {
+      valid = false;
+      consentBox.textContent = 'Harap centang persetujuan.';
+    } else {
+      consentBox.textContent = '';
+    }
+
+    const honeypot = document.getElementById('website');
+    if (honeypot && honeypot.value.trim()) {
+      valid = true;
+    }
+
+    if (!valid) return;
+
+    const newApplicant = {
+      nama: document.getElementById('nama').value.trim(),
+      pasar: document.getElementById('pasar').value.trim(),
+      peran: document.getElementById('peran').value,
+      whatsapp: document.getElementById('whatsapp').value.trim(),
+      poin: 0,
+      rank: 'Bronze'
+    };
+
+    state.pendaftaran.push(newApplicant);
+    state.pedagang.push({
+      nama: newApplicant.nama,
+      pasar: newApplicant.pasar,
+      peran: newApplicant.peran,
+      poin: 0,
+      rank: 'Bronze',
+      kg_minggu_ini: 0
+    });
+    saveState(state);
+
+    form.reset();
+    document.getElementById('joinSuccess').classList.remove('hidden');
+  });
+}
+
+function initInputPage() {
+  const loginCard = document.getElementById('loginCard');
+  const inputPanel = document.getElementById('inputPanel');
+  const loginForm = document.getElementById('loginForm');
+  const loginError = document.getElementById('loginError');
+
+  if (!loginForm) return;
+
+  const isLoggedIn = Boolean(getState().login.isLoggedIn);
+  if (isLoggedIn) {
+    loginCard.classList.add('hidden');
+    inputPanel.classList.remove('hidden');
+  }
+
+  loginForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+    if (username === 'admin' && password === 'biovert2026') {
+      const state = getState();
+      state.login.isLoggedIn = true;
+      saveState(state);
+      loginCard.classList.add('hidden');
+      inputPanel.classList.remove('hidden');
+    } else {
+      loginError.classList.remove('hidden');
+    }
+  });
+
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    const state = getState();
+    state.login.isLoggedIn = false;
+    saveState(state);
+    loginCard.classList.remove('hidden');
+    inputPanel.classList.add('hidden');
+  });
+
+  const select = document.getElementById('pedagangSelect');
+  if (!select) return;
+
+  const options = getState().pedagang.map((entry) => `<option value="${entry.nama}">${entry.nama}</option>`).join('');
+  select.innerHTML = `<option value="">Pilih Pedagang</option>${options}`;
+
+  document.getElementById('tanggalSetoran').valueAsDate = new Date();
+
+  document.getElementById('setoranForm')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const pedagang = select.value;
+    const tanggal = document.getElementById('tanggalSetoran').value;
+    const berat = Number(document.getElementById('beratSampah').value);
+    const kerapian = document.getElementById('kerapian').value;
+    const catatan = document.getElementById('catatan').value;
+
+    let valid = true;
+    const fields = [
+      { id: 'pedagangSelect', value: pedagang, message: 'Pilih pedagang.' },
+      { id: 'tanggalSetoran', value: tanggal, message: 'Tanggal tidak valid.' },
+      { id: 'beratSampah', value: berat, message: 'Berat harus lebih dari 0.' },
+      { id: 'kerapian', value: kerapian, message: 'Pilih kerapian.' }
+    ];
+
+    fields.forEach(({ id, value, message }) => {
+      const field = document.getElementById(id);
+      const error = field.closest('.field-group').querySelector('.error-message');
+      if (!value || (id === 'beratSampah' && berat <= 0)) {
+        valid = false;
+        field.classList.add('input-error');
+        error.textContent = message;
+      } else {
+        field.classList.remove('input-error');
+        error.textContent = '';
+      }
+    });
+
+    if (!valid) return;
+
+    const multiplier = { Rapi: 1.5, 'Cukup Rapi': 1, 'Kurang Rapi': 0.5 }[kerapian];
+    const poin = Math.round(berat * multiplier);
+
+    const state = getState();
+    state.setoran_history.push({ nama: pedagang, kg: berat, poin, tanggal, kerapian, catatan });
+    state.lastUpdated = new Date().toISOString();
+    saveState(state);
+
+    document.getElementById('setoranForm').reset();
+    document.getElementById('tanggalSetoran').valueAsDate = new Date();
+    renderHistoryList();
+  });
+
+  renderHistoryList();
+}
+
+function renderHistoryList() {
+  const list = document.getElementById('historyList');
+  if (!list) return;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const entries = getState().setoran_history.filter((entry) => entry.tanggal === today);
+  list.innerHTML = entries.length ? entries.map((entry) => `
+    <div class="history-item">
+      <div>
+        <strong>${entry.nama}</strong>
+        <span>${entry.kg} kg · ${entry.poin} poin</span>
+      </div>
+      <div class="history-actions">
+        <button class="btn btn-outline small">Edit</button>
+        <button class="btn btn-outline small danger">Hapus</button>
+      </div>
+    </div>
+  `).join('') : '<p class="empty-inline">Belum ada setoran hari ini.</p>';
+}
+
+function initDashboardCalendar() {
+  const monthLabel = document.getElementById('calendarMonthLabel');
+  const grid = document.getElementById('calendarGrid');
+  const details = document.getElementById('dateDetails');
+  if (!monthLabel || !grid || !details) return;
+
+  const calendarState = {
+    current: new Date(2026, 8, 1),
+    selected: new Date(2026, 8, 14)
+  };
+
+  const renderCalendar = () => {
+    const year = calendarState.current.getFullYear();
+    const month = calendarState.current.getMonth();
+    const firstOfMonth = new Date(year, month, 1);
+    const lastOfMonth = new Date(year, month + 1, 0);
+    const startDay = firstOfMonth.getDay();
+    const daysInMonth = lastOfMonth.getDate();
+    const cells = [];
+
+    monthLabel.textContent = firstOfMonth.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+    for (let i = 0; i < startDay; i += 1) {
+      cells.push('<div class="day day-empty"></div>');
+    }
+
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      const iso = new Date(year, month, day).toISOString().slice(0, 10);
+      const isSelected = calendarState.selected.getDate() === day && calendarState.selected.getMonth() === month;
+      const hasData = getState().setoran_kalender.some((item) => item.tanggal === iso);
+      cells.push(`
+        <button class="day ${isSelected ? 'is-selected' : ''}" data-date="${iso}">
+          <span>${day}</span>
+          ${hasData ? '<i class="dot"></i>' : ''}
+        </button>
+      `);
+    }
+
+    while (cells.length % 7 !== 0) {
+      cells.push('<div class="day day-empty"></div>');
+    }
+
+    grid.innerHTML = cells.join('');
+
+    grid.querySelectorAll('.day[data-date]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const iso = button.dataset.date;
+        const target = new Date(`${iso}T12:00:00`);
+        calendarState.selected = target;
+        renderCalendar();
+        const record = getState().setoran_kalender.find((item) => item.tanggal === iso);
+        if (!record) {
+          details.innerHTML = '<h3>Detail Tanggal</h3><p class="empty-state">Tidak ada setoran tercatat pada tanggal ini.</p>';
+          return;
+        }
+        details.innerHTML = `
+          <h3>${new Date(`${iso}T12:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</h3>
+          <div class="detail-row"><span>kg sampah masuk</span><strong>${record.kg_masuk} kg</strong></div>
+          <div class="detail-row"><span>jumlah pedagang setor</span><strong>${record.pedagang_setor}</strong></div>
+          <div class="detail-row"><span>poin terkumpul</span><strong>${record.poin_terkumpul}</strong></div>
+        `;
+      });
+    });
+  };
+
+  document.getElementById('prevMonth')?.addEventListener('click', () => {
+    calendarState.current = new Date(calendarState.current.getFullYear(), calendarState.current.getMonth() - 1, 1);
+    renderCalendar();
+  });
+
+  document.getElementById('nextMonth')?.addEventListener('click', () => {
+    calendarState.current = new Date(calendarState.current.getFullYear(), calendarState.current.getMonth() + 1, 1);
+    renderCalendar();
+  });
+
+  renderCalendar();
+}
+
+function initDownloadCsv() {
+  const button = document.getElementById('downloadCsvBtn');
+  if (!button) return;
+  button.addEventListener('click', () => {
+    const rows = getState().setoran_kalender.map((entry) => [entry.tanggal, entry.kg_masuk, entry.pedagang_setor, entry.poin_terkumpul].join(','));
+    const csv = ['tanggal,kg_masuk,pedagang_setor,poin_terkumpul', ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'biovert-data.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const state = getState();
+  document.documentElement.lang = state.language || defaultLanguage;
+  updateLastUpdatedText('.last-updated');
+  updateDashboardUpdated();
+  setupLanguageButtons();
+  initNavigation();
+  applyTranslations();
+
+  renderHome();
+  renderLeaderboardList();
+  bindLeaderboardSearch();
+  initLeaderboardPagination();
+  renderProducts();
+  renderMitraProfile();
+  renderSponsorStats();
+  initJoinForm();
+  initInputPage();
+  initDashboardCalendar();
+  initDownloadCsv();
+
+  setInterval(() => {
+    updateLastUpdatedText('.last-updated');
+    updateDashboardUpdated();
+  }, 30000);
+});

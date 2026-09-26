@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Biovert by CYCLO</title>
+    <meta name="description" content="Biovert mengubah sampah organik pasar menjadi pakan ternak dan pupuk organik melalui budidaya maggot BSF." />
+    <meta property="og:title" content="Biovert by CYCLO" />
+    <meta property="og:description" content="Sampah pasar jadi pakan dan pupuk untuk masa depan yang berkelanjutan." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/assets/images/og-image.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand" href="index.html" aria-label="Biovert home">
+          <span class="brand-mark">B</span>
+          <span class="brand-text">
+            <strong>Biovert</strong>
+            <small>by CYCLO</small>
+          </span>
+        </a>
+
+        <nav class="nav" aria-label="Main navigation">
+          <a href="index.html">Beranda</a>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="leaderboard.html">Leaderboard</a>
+          <a href="katalog.html">Katalog</a>
+          <a href="tentang.html">Tentang Kami</a>
+        </nav>
+
+        <div class="nav-actions">
+          <div class="language-switcher" aria-label="Language switcher">
+            <button class="lang-btn active" data-lang="id">ID</button>
+            <button class="lang-btn" data-lang="en">EN</button>
+            <button class="lang-btn" data-lang="zh">中文</button>
+          </div>
+          <a class="btn btn-primary" href="gabung.html">Gabung Jadi Mitra</a>
+        </div>
+
+        <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero section-sm">
+        <div class="container hero-grid">
+          <div class="hero-copy reveal-up">
+            <p class="eyebrow" data-i18n="home.eyebrow">Dampak nyata untuk pasar dan lingkungan</p>
+            <h1 data-i18n="home.heroTitle">Sampah Pasar Jadi Pakan dan Pupuk</h1>
+            <p class="lead" data-i18n="home.heroLead">Biovert mengubah sampah organik pasar tradisional menjadi pakan ternak dan pupuk organik yang bernilai tinggi.</p>
+            <div class="hero-actions">
+              <a href="dashboard.html" class="btn btn-primary" data-i18n="home.dashboardBtn">Lihat Dashboard</a>
+              <a href="gabung.html" class="btn btn-outline" data-i18n="home.joinBtn">Gabung Jadi Mitra</a>
+            </div>
+            <div class="meta-row">
+              <span class="pill"><strong>1.240</strong> kg terolah</span>
+              <span class="pill"><strong>32</strong> mitra aktif</span>
+            </div>
+          </div>
+
+          <div class="hero-visual reveal-up">
+            <div class="visual-card card">
+              <div class="mini-grid">
+                <div class="mini-box green"></div>
+                <div class="mini-box amber"></div>
+                <div class="mini-box dark"></div>
+                <div class="mini-box light"></div>
+              </div>
+              <div class="impact-glow">
+                <span class="impact-text">+1.240 kg</span>
+                <small>terolah bulan ini</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats section-sm">
+        <div class="container">
+          <div class="section-heading center">
+            <p class="eyebrow" data-i18n="home.statsEyebrow">Statistik dampak</p>
+            <h2 data-i18n="home.statsTitle">Dampak nyata yang terus tumbuh</h2>
+          </div>
+          <div id="impact-cards" class="stats-grid"></div>
+        </div>
+      </section>
+
+      <section class="workflow section-sm">
+        <div class="container">
+          <div class="section-heading center">
+            <p class="eyebrow" data-i18n="home.workflowEyebrow">Alur kerja</p>
+            <h2 data-i18n="home.workflowTitle">Dari sampah pasar menuju nilai ekonomi</h2>
+          </div>
+          <div class="steps-grid">
+            <div class="step-card card">
+              <div class="step-icon">01</div>
+              <h3 data-i18n="home.step1">Setor</h3>
+              <p data-i18n="home.step1Text">Pedagang menyetorkan sampah organik hasil pasar.</p>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-card card">
+              <div class="step-icon">02</div>
+              <h3 data-i18n="home.step2">Maggot Mengolah</h3>
+              <p data-i18n="home.step2Text">BSF mengolah limbah secara efisien dan cepat.</p>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-card card">
+              <div class="step-icon">03</div>
+              <h3 data-i18n="home.step3">Pakan & Pupuk</h3>
+              <p data-i18n="home.step3Text">Hasilnya menjadi pakan ternak dan pupuk kasgot.</p>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-card card">
+              <div class="step-icon">04</div>
+              <h3 data-i18n="home.step4">Disalurkan</h3>
+              <p data-i18n="home.step4Text">Produk didistribusikan ke peternak dan petani.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="testimonials section-sm">
+        <div class="container">
+          <div class="section-heading center">
+            <p class="eyebrow" data-i18n="home.testiEyebrow">Testimoni</p>
+            <h2 data-i18n="home.testiTitle">Mitra yang merasakan manfaatnya</h2>
+          </div>
+          <div id="testimonial-cards" class="testimonial-grid"></div>
+        </div>
+      </section>
+
+      <section class="cta-band section-sm">
+        <div class="container">
+          <div class="cta-panel">
+            <div>
+              <p class="eyebrow light" data-i18n="home.ctaEyebrow">Bergabung bersama Biovert</p>
+              <h2 data-i18n="home.ctaTitle">Mari bangun ekonomi sirkular untuk pasar tradisional.</h2>
+            </div>
+            <a href="gabung.html" class="btn btn-light" data-i18n="home.ctaBtn">Gabung Sekarang</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <div class="brand footer-brand">
+            <span class="brand-mark">B</span>
+            <span class="brand-text">
+              <strong>Biovert</strong>
+              <small>by CYCLO</small>
+            </span>
+          </div>
+          <p data-i18n="footer.about">Membawa sampah organik pasar menjadi solusi bernilai bagi lingkungan dan ekonomi lokal.</p>
+        </div>
+        <div>
+          <h3 data-i18n="footer.linksTitle">Link cepat</h3>
+          <ul>
+            <li><a href="index.html" data-i18n="nav.home">Beranda</a></li>
+            <li><a href="dashboard.html" data-i18n="nav.dashboard">Dashboard</a></li>
+            <li><a href="leaderboard.html" data-i18n="nav.leaderboard">Leaderboard</a></li>
+            <li><a href="katalog.html" data-i18n="nav.catalog">Katalog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 data-i18n="footer.contactTitle">Kontak & partner</h3>
+          <p>Email: hello@biovert.id</p>
+          <p>WhatsApp: +62 812-3456-7890</p>
+          <div class="partner-badges">
+            <span>BSF</span>
+            <span>CYCLO</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container">
+          <p>© 2026 Biovert by CYCLO</p>
+          <p class="last-updated" data-role="last-updated">Terakhir diperbarui: --</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

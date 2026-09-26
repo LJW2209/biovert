@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Katalog Produk - Biovert</title>
+    <meta name="description" content="Katalog produk Biovert: pakan maggot basah, maggot kering, dan pupuk kasgot." />
+    <meta property="og:title" content="Katalog Produk - Biovert" />
+    <meta property="og:description" content="Temukan produk ramah lingkungan dari Biovert." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/assets/images/og-image.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand" href="index.html" aria-label="Biovert home">
+          <span class="brand-mark">B</span>
+          <span class="brand-text">
+            <strong>Biovert</strong>
+            <small>by CYCLO</small>
+          </span>
+        </a>
+
+        <nav class="nav" aria-label="Main navigation">
+          <a href="index.html">Beranda</a>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="leaderboard.html">Leaderboard</a>
+          <a href="katalog.html">Katalog</a>
+          <a href="tentang.html">Tentang Kami</a>
+        </nav>
+
+        <div class="nav-actions">
+          <div class="language-switcher" aria-label="Language switcher">
+            <button class="lang-btn active" data-lang="id">ID</button>
+            <button class="lang-btn" data-lang="en">EN</button>
+            <button class="lang-btn" data-lang="zh">中文</button>
+          </div>
+          <a class="btn btn-primary" href="gabung.html">Gabung Jadi Mitra</a>
+        </div>
+
+        <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <div class="container page-header">
+        <div>
+          <p class="eyebrow">Katalog produk</p>
+          <h1>Produk Biovert</h1>
+        </div>
+      </div>
+      <div class="container catalog-filter">
+        <div class="segmented-control">
+          <button class="segment active" data-category="all">Semua</button>
+          <button class="segment" data-category="Pakan">Pakan</button>
+          <button class="segment" data-category="Pupuk">Pupuk</button>
+        </div>
+      </div>
+      <div class="container">
+        <div id="productGrid" class="product-grid"></div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <div class="brand footer-brand">
+            <span class="brand-mark">B</span>
+            <span class="brand-text">
+              <strong>Biovert</strong>
+              <small>by CYCLO</small>
+            </span>
+          </div>
+          <p>Membawa sampah organik pasar menjadi solusi bernilai bagi lingkungan dan ekonomi lokal.</p>
+        </div>
+        <div>
+          <h3>Link cepat</h3>
+          <ul>
+            <li><a href="index.html">Beranda</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="leaderboard.html">Leaderboard</a></li>
+            <li><a href="katalog.html">Katalog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Kontak & partner</h3>
+          <p>Email: hello@biovert.id</p>
+          <p>WhatsApp: +62 812-3456-7890</p>
+          <div class="partner-badges">
+            <span>BSF</span>
+            <span>CYCLO</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container">
+          <p>© 2026 Biovert by CYCLO</p>
+          <p class="last-updated">Terakhir diperbarui: --</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>
